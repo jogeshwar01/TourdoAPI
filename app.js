@@ -6,22 +6,11 @@ const app = express();
 //middleware -it can modify incoming request data
 app.use(express.json());
 
-// app.get('/', (req, res) => {
-//     res.status(200).json({
-//         message: 'Hello from the server side!',
-//         app: 'Tourdo'
-//     });
-// })
-
-// app.post('/', (req, res) => {
-//     res.send('You can post to this endpoint...');
-// })
-
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
     res.status(200).json({
         //add status as we use JSend format       
         //added result just for easy info to client(not part of JSend)
@@ -31,32 +20,11 @@ app.get('/api/v1/tours', (req, res) => {
             tours            //no need to write both key and value if they have same name in ES6
         }
     })
-})
+}
 
-app.post('/api/v1/tours', (req, res) => {
-    //console.log(req.body);
-
-    //get id
-    const newId = tours[tours.length - 1].id + 1;
-    //to merge two objects,we use assign method
-    const newTour = Object.assign({ id: newId }, req.body)
-
-    tours.push(newTour);
-
-    //need to use asynchronous code in callbacks so dont use writeFileSync here
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
-        res.status(201).json({
-            status: 'status',
-            data: {
-                tour: newTour
-            }
-        })
-    })
-})
-
-app.get('/api/v1/tours/:id', (req, res) => {
+const getTour = (req, res) => {
     //can add ? for optional parameters like :id?
-    console.log(req.params);
+    //console.log(req.params);
 
     const id = req.params.id * 1;  //trick to convert string to number
     const tour = tours.find(el => el.id == id);
@@ -75,10 +43,31 @@ app.get('/api/v1/tours/:id', (req, res) => {
             tour
         }
     })
-})
+}
+
+const createTour = (req, res) => {
+    //console.log(req.body);
+
+    //get id
+    const newId = tours[tours.length - 1].id + 1;
+    //to merge two objects,we use assign method
+    const newTour = Object.assign({ id: newId }, req.body)
+
+    tours.push(newTour);
+
+    //need to use asynchronous code in callbacks so dont use writeFileSync here
+    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+        res.status(201).json({
+            status: 'status',
+            data: {
+                tour: newTour
+            }
+        })
+    })
+}
 
 //not implementing logic of patch and delete as we are just doing sample testing
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
 
     const id = req.params.id * 1;
     if (id > tours.length) {
@@ -94,9 +83,9 @@ app.patch('/api/v1/tours/:id', (req, res) => {
             tour: '<Updated tour here...>'
         }
     })
-})
+}
 
-app.delete('/api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
 
     const id = req.params.id * 1;
     if (id > tours.length) {
@@ -110,7 +99,22 @@ app.delete('/api/v1/tours/:id', (req, res) => {
         status: 'success',
         data: null
     })
-})
+}
+
+//app.get('/api/v1/tours', getAllTours);
+//app.post('/api/v1/tours', createTour);
+// app.get('/api/v1/tours/:id', getTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+app.route('/api/v1/tours')
+    .get(getAllTours)
+    .post(createTour)
+
+app.route('/api/v1/tours/:id')
+    .get(getTour)
+    .patch(updateTour)
+    .delete(deleteTour)
 
 const port = 3000;
 app.listen(port, () => {
