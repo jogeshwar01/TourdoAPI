@@ -43,6 +43,7 @@ exports.createTour = async (req, res) => {
     try {
         // const newTour = new Tour({})
         // newTour.save()
+        // Model.prototype.save() -->in mongoose documentation this will be written like this always
 
         //another way to do the above creation is to use create method
         const newTour = await Tour.create(req.body);
@@ -63,14 +64,26 @@ exports.createTour = async (req, res) => {
     }
 }
 
-//not implementing logic of patch and delete as we are just doing sample testing
-exports.updateTour = (req, res) => {
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour: '<Updated tour here...>'
-        }
-    })
+exports.updateTour = async (req, res) => {
+    try {
+        //put request won't work as it expects original object to be completely replaced
+        const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,  //to return the newly updated document
+            runValidators: true //run validators again on newly created document
+        });
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                tour
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
 }
 
 exports.deleteTour = (req, res) => {
