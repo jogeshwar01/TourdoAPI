@@ -2,7 +2,20 @@ const Tour = require('./../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
     try {
-        const tours = await Tour.find();
+        //1.MONGODB -->const tours = await Tour.find({ duration:5 , difficulty:'easy' }); 
+        //2.MONGOOSE-->const tours = await Tours.find().where('duration').equals(5).where('difficulty').equals('easy');
+        //for query string ,just pass it instead of predefined values inside function
+
+        //using mongoose methods
+        // BUILD QUERY
+        const queryObj = { ...req.query };  //trick to make a hard copy and not a shallow copy of req.query as we dont want to change the actual req.query
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach(el => delete queryObj[el]);  //delete excluded fields from the query object
+
+        const query = Tour.find(queryObj);
+
+        // EXECUTE QUERY
+        const tours = await query;
 
         // SEND RESPONSE
         res.status(200).json({
