@@ -1,5 +1,13 @@
 const Tour = require('./../models/tourModel');
 
+//top-5-cheap tours --> /api/v1/tours?limit=5&sort=-ratingsAverage,price&fields=name,price,ratingsAverage,summary,difficulty
+exports.aliasTopTours = (req, res, next) => {
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+    next();
+};
+
 exports.getAllTours = async (req, res) => {
     try {
         //1.MONGODB -->const tours = await Tour.find({ duration:5 , difficulty:'easy' }); 
