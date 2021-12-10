@@ -43,6 +43,19 @@ exports.getAllTours = async (req, res) => {
             query = query.select('-__v');   //exclude __v with - sign ->this field is added by mongo as it uses it internally but we dont need it
         }
 
+        // 4) Pagination -->allow use to select a certain page of our results in case of a lot of results
+        //   /api/v1/tours?page=2&limit=10 , 1-10 page1 , 11-20 page2 ......
+        const page = req.query.page * 1 || 1;//default page 1    //convert string to number
+        const limit = req.query.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+
+        query = query.skip(skip).limit(limit);
+
+        if (req.query.page) {
+            const numTours = await Tour.countDocuments();
+            if (skip >= numTours) throw new Error('This page does not exist');
+        }
+
         // EXECUTE QUERY
         const tours = await query;
 
