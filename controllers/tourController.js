@@ -6,13 +6,22 @@ exports.getAllTours = async (req, res) => {
         //2.MONGOOSE-->const tours = await Tours.find().where('duration').equals(5).where('difficulty').equals('easy');
         //for query string ,just pass it instead of predefined values inside function
 
+        //console.log(req.query);         //queryObj -{ duration: { gte: '5' }, difficulty: 'easy' }
+
         //using mongoose methods
         // BUILD QUERY
+        // 1) Filtering
         const queryObj = { ...req.query };  //trick to make a hard copy and not a shallow copy of req.query as we dont want to change the actual req.query
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach(el => delete queryObj[el]);  //delete excluded fields from the query object
 
-        const query = Tour.find(queryObj);
+        // 2) Advanced Filtering
+        let queryStr = JSON.stringify(queryObj);
+        //regular expression in JS--difficult concept ->replace eg) gte with $gte to match mongo methods
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+        //console.log(JSON.parse(queryStr));
+
+        const query = Tour.find(JSON.parse(queryStr));
 
         // EXECUTE QUERY
         const tours = await query;
