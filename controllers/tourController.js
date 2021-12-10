@@ -1,33 +1,42 @@
 const Tour = require('./../models/tourModel');
 
-exports.getAllTours = (req, res) => {
-    console.log(req.requestTime);
+exports.getAllTours = async (req, res) => {
+    try {
+        const tours = await Tour.find();
 
-    res.status(200).json({
-        //add status as we use JSend format       
-        //added result just for easy info to client(not part of JSend)
-        status: 'success',
-        requestedAt: req.requestTime,
-        // results: tours.length,
-        // data: {
-        //     tours            //no need to write both key and value if they have same name in ES6
-        // }
-    })
+        // SEND RESPONSE
+        res.status(200).json({
+            status: 'success',
+            results: tours.length,
+            data: {
+                tours
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
 }
 
-exports.getTour = (req, res) => {
-    //can add ? for optional parameters like :id?
-    //console.log(req.params);
+exports.getTour = async (req, res) => {
+    try {
+        const tour = await Tour.findById(req.params.id);
+        //above is shortcut for --> Tour.findOne({ _id: req.params.id })
 
-    const id = req.params.id * 1;  //trick to convert string to number
-    // const tour = tours.find(el => el.id == id);
-
-    // res.status(200).json({
-    //     status: 'success',
-    //     data: {
-    //         tour
-    //     }
-    // })
+        res.status(200).json({
+            status: 'success',
+            data: {
+                tour
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
 }
 
 exports.createTour = async (req, res) => {
