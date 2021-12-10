@@ -31,7 +31,16 @@ exports.getAllTours = async (req, res) => {
 
             query = query.sort(sortBy);
         } else {
-            query = query.sort('-createdAt');   //default sort for newest ones earlier
+            query = query.sort('-createdAt');   //default descending sort for newest ones earlier
+        }
+
+        // 3) Field Limiting ->only return fields which the client wants
+        //   /api/v1/tours/fields=name,duration,price
+        if (req.query.fields) {
+            const fields = req.query.fields.split(',').join(' ');
+            query = query.select(fields);
+        } else {
+            query = query.select('-__v');   //exclude __v with - sign ->this field is added by mongo as it uses it internally but we dont need it
         }
 
         // EXECUTE QUERY
