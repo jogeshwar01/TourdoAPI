@@ -1,15 +1,5 @@
 const Tour = require('./../models/tourModel');
 
-exports.checkBody = (req, res, next) => {
-    if (!req.body.name || !req.body.price) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Missing name or price'
-        });
-    }
-    next();
-};
-
 exports.getAllTours = (req, res) => {
     console.log(req.requestTime);
 
@@ -40,13 +30,28 @@ exports.getTour = (req, res) => {
     // })
 }
 
-exports.createTour = (req, res) => {
-    res.status(201).json({
-        status: 'status',
-        // data: {
-        //     tour: newTour
-        // }
-    })
+exports.createTour = async (req, res) => {
+    try {
+        // const newTour = new Tour({})
+        // newTour.save()
+
+        //another way to do the above creation is to use create method
+        const newTour = await Tour.create(req.body);
+
+        //there may be an error related to node not supporting async/await until some version
+        //so to resolve it, add "engines": {"node": ">=10.0.0"} in the package.json file
+        res.status(201).json({
+            status: 'success',
+            data: {
+                tour: newTour
+            }
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: 'Invalid data sent!'
+        });
+    }
 }
 
 //not implementing logic of patch and delete as we are just doing sample testing
