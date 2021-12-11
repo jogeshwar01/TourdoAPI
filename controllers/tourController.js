@@ -117,3 +117,44 @@ exports.deleteTour = async (req, res) => {
         });
     }
 }
+
+exports.getTourStats = async (req, res) => {
+    try {
+        //need to await it to get back our result,else we will ust get a pipeline aggregate object
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage: { $gte: 4.5 } }
+            },
+            {
+                $group: {
+                    _id: { $toUpper: '$difficulty' },   //what we want to group by
+                    numTours: { $sum: 1 },  //add 1 for each documnet
+                    numRatings: { $sum: '$ratingsQuantity' },
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' }
+                }
+            },
+            {
+                $sort: { avgPrice: 1 }  //need to use field names specified in the group part
+            },
+            //can repeat stages like match here
+            // {
+            //   $match: { _id: { $ne: 'EASY' } }   //id not equal to easy
+            // }
+        ]);
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                stats
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
+};
