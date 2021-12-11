@@ -54,7 +54,18 @@ const tourSchema = new mongoose.Schema({
         select: false       //to hide this from output when sending back our responses
     },
     startDates: [Date]
-})
+},
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    }
+);
+
+// will be created each time data sent from database - not stored in database -hence can't use in queries
+// used regular function instead of an arrow function as we want to use 'this'
+tourSchema.virtual('durationWeeks').get(function () {
+    return this.duration / 7;
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
