@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+// const validator = require('validator');
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -8,7 +9,8 @@ const tourSchema = new mongoose.Schema({
         trim: true,
         unique: true,       //not a validator (though will show error if name same)
         maxlength: [40, 'A tour name must have less or equal then 40 characters'],
-        minlength: [10, 'A tour name must have more or equal then 10 characters']
+        minlength: [10, 'A tour name must have more or equal then 10 characters'],
+        // validate: [validator.isAlpha, 'Tour name must only contain characters']
     },
     slug: String,
     duration: {
@@ -44,7 +46,16 @@ const tourSchema = new mongoose.Schema({
         required: [true, 'A tour must have a price']
     },
     priceDiscount: {
-        type: Number
+        type: Number,
+        validate: {
+            validator: function (val) {
+                // this only points to current doc on NEW document creation
+                // hence this will not work in updating 
+                return val < this.price;
+            },
+            // can access value using this wierd syntax --specific to mongoose and not related to javascript
+            message: 'Discount price ({VALUE}) should be below regular price'
+        }
     },
     summary: {
         type: String,
