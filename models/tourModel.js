@@ -105,6 +105,17 @@ tourSchema.post(/^find/, function (docs, next) {
     next();
 });
 
+// AGGREGATION MIDDLEWARE
+// hide secret tours from aggregations - add here to commonly add in all aggregations
+// this points to current aggregation object
+tourSchema.pre('aggregate', function (next) {
+    // unshift --standard js method to add at start of an array
+    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+    console.log(this.pipeline());
+    next();
+});
+
 const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
