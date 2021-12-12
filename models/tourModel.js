@@ -55,7 +55,11 @@ const tourSchema = new mongoose.Schema({
         default: Date.now(),    //returns date in millisecond which is converted to formatted date in mongo
         select: false       //to hide this from output when sending back our responses
     },
-    startDates: [Date]
+    startDates: [Date],
+    secretTour: {
+        type: Boolean,
+        default: false
+    }
 },
     {
         toJSON: { virtuals: true },
@@ -85,6 +89,21 @@ tourSchema.pre('save', function (next) {
 //   console.log(doc);
 //   next();
 // });
+
+// QUERY MIDDLEWARE -- before/after certain query is executed
+// tourSchema.pre('find', function(next) {      //worl only for find --this will point to current query find here and not at current document
+// /^find/ --regex for all starting with find  --all secret tours hidden in all queries
+tourSchema.pre(/^find/, function (next) {       //works for all finds like find,findOne,findMany etc so that it works for all
+    this.find({ secretTour: { $ne: true } });       //show only the ones where secretTour is not equal to true
+
+    this.start = Date.now();
+    next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+    console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+    next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
