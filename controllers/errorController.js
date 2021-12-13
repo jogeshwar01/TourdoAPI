@@ -7,6 +7,7 @@ const handleCastErrorDB = err => {
     return new AppError(message, 400);
 };
 
+//eg) create a new tour with same value of name as stored on db
 const handleDuplicateFieldsDB = err => {
     //const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];  //theory--just do by search--regex to extract name out of error
     //this above one is for previous generations where error object was different
@@ -14,6 +15,15 @@ const handleDuplicateFieldsDB = err => {
     console.log(value);
 
     const message = `Duplicate field value: ${value}. Please use another value!`;
+    return new AppError(message, 400);
+};
+
+//eg) update a tour and set difficulty to "whatever" and name to shorter than length 10 which are invalid
+const handleValidationErrorDB = err => {
+    //create a message combining all the error messages in err
+    const errors = Object.values(err.errors).map(el => el.message);
+
+    const message = `Invalid input data. ${errors.join('. ')}`;
     return new AppError(message, 400);
 };
 
@@ -28,7 +38,7 @@ const sendErrorDev = (err, res) => {
 
 const sendErrorProd = (err, res) => {
     // Operational, trusted error: send message to client-only errors created by ourselves in App Error class are operational
-    //we also want to mark the mongoose errors and some more as operational 
+    //we also want to mark the mongoose errors and some more as operational so we do new Apperror for that in handle functions
     if (err.isOperational) {
         res.status(err.statusCode).json({
             status: err.status,
@@ -70,6 +80,7 @@ module.exports = (err, req, res, next) => {
         if (error.name === 'CastError')
             error = handleCastErrorDB(error);
         if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+        if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
 
         sendErrorProd(error, res);
     }
