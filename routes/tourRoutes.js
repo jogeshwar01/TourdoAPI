@@ -16,6 +16,10 @@ router.route('/')
     .get(tourController.getAllTours)
     .post(tourController.createTour)
 
+//could have added catchAsync here directly rather than in controller and it will work in the same way
+//but then we would have to remember which one is fully async but here as all are async so no problem but may be there can be 
+//  .get(catchAsync(tourController.getAllTours))        -this is not preferred -the other way is better 
+
 router.route('/:id')
     .get(tourController.getTour)
     .patch(tourController.updateTour)
