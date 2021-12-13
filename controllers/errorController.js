@@ -1,3 +1,12 @@
+const AppError = require('./../utils/appError');
+
+//eg) wrong id in get tour by id
+const handleCastErrorDB = err => {
+    const message = `Invalid ${err.path}: ${err.value}.`;
+    //path and value -got to know about these after seeing error object in the output
+    return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
     res.status(err.statusCode).json({
         status: err.status,
@@ -37,7 +46,20 @@ module.exports = (err, req, res, next) => {
 
     if (process.env.NODE_ENV === 'development') {
         sendErrorDev(err, res);
-    } else if (process.env.NODE_ENV === 'production') {
-        sendErrorProd(err, res);
+    }
+    //this is not working if we do process.env.NODE_ENV === 'production'
+    //When we used set NODE_ENV=production && something in npm scripts then NODE_ENV=production becomes production + " " with one whitespace after it.
+    else if (process.env.NODE_ENV.trim() === 'production') {
+        let error = { ...err }; //just create hard copy of err as we dont want to change the original err
+
+        //added these next 2 lines as due to some strange reason,
+        //these both properties were not copied to error from err
+        error.message = err.message;
+        error.name = err.name;
+
+        if (error.name === 'CastError')
+            error = handleCastErrorDB(error);
+
+        sendErrorProd(error, res);
     }
 };
