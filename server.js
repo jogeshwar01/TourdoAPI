@@ -23,6 +23,18 @@ mongoose
     .then((con) => console.log('DB connection successful!'));
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`App running on port ${port}...`);
+});
+
+//to handle all unhandled promise rejections -eg) problem connecting to database like if password was wrong is dotenv file 
+process.on('unhandledRejection', err => {
+    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+    console.log(err.name, err.message);
+
+    //to shutdown gracefully,first shutdown server(give time to server to handle all pending requests) 
+    //and then shut process  (rather than directly exiting)
+    server.close(() => {
+        process.exit(1);
+    });
 });
