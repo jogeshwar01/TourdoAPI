@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please provide a password'],
-        minlength: 8
+        minlength: 8,
+        select: false       //to hide password while reading from database
     },
     passwordConfirm: {
         type: String,
@@ -34,6 +35,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// hash password before saving to db
 userSchema.pre('save', async function (next) {
     // Only run this function if password was actually modified/created new
     if (!this.isModified('password')) return next();
@@ -46,6 +48,16 @@ userSchema.pre('save', async function (next) {
     this.passwordConfirm = undefined;
     next();
 });
+
+// check if entered password is same as the one stored in db for a particular email
+// instance method and will work on all documents of a certain collection
+userSchema.methods.correctPassword = async function (
+    candidatePassword,
+    userPassword
+) {
+    //this.password will not be available as it has select:false so we need to pass both passwords into this function
+    return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 
