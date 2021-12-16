@@ -7,8 +7,21 @@ const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 
 const signToken = id => {
+    // SECRET should be atleast 32 letters-preffered and EXPIRES_IN we have set to 90d ie 90 days
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
+    });
+};
+
+const createSendToken = (user, statusCode, res) => {
+    const token = signToken(user._id);
+
+    res.status(statusCode).json({
+        status: 'success',
+        token,
+        data: {
+            user
+        }
     });
 };
 
@@ -26,16 +39,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         role: req.body.role
     });
 
-    // SECRET should be atleast 32 letters-preffered and EXPIRES_IN we have set to 90d ie 90 days
-    const token = signToken(newUser._id);
+    createSendToken(newUser, 201, res);
 
-    res.status(201).json({
-        status: 'success',
-        token,
-        data: {
-            user: newUser
-        }
-    })
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -57,13 +62,8 @@ exports.login = catchAsync(async (req, res, next) => {
         return next(new AppError('Incorrect email or password', 401));
     }
 
-    const token = signToken(user._id);
     // 3) If everything ok, send token to client
-    res.status(200).json({
-        status: 'success',
-        token
-    })
-
+    createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -149,7 +149,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         'host'
     )}/api/v1/users/resetPassword/${resetToken}`;
 
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} \nIf you didn't forget your password, please ignore this email!`;
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}\nIf you didn't forget your password, please ignore this email!`;
 
     try {
         // send token to email 
@@ -206,10 +206,27 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
     // 3) Update changedPasswordAt property for the user
     // 4) Log the user in, send JWT
-    const token = signToken(user._id);
+    createSendToken(user, 200, res);
+});
 
-    res.status(201).json({
-        status: 'success',
-        token
-    })
+exports.updatePassword = catchAsync(async (req, res, next) => {
+    // 1) Get user from collection
+    // will have currentUser on req due to protect middleware which runs before this
+    const user = await User.findById(req.user.id).select('+password');  //select password explicitly as it has select:false in schema
+
+    // 2) Check if POSTed current password is correct
+    if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+        return next(new AppError('Your current password is wrong.', 401));
+    }
+
+    // 3) If so, update password
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    await user.save();  //dont turn off validation as we need to check password=passwordConfirm and other validations
+    // User.findByIdAndUpdate will NOT work as intended! due to the following reasons
+    // 1) validators won't work on passwordConfirm and others also
+    // 2) also the two pre 'save' middlewares wont work
+
+    // 4) Log user in, send JWT
+    createSendToken(user, 200, res);
 });
