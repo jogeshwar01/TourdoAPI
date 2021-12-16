@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');    //used jwt instead of sessions to keep our RESTful API stateless
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -18,7 +19,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm
+        passwordConfirm: req.body.passwordConfirm,
+        passwordChangedAt: req.body.passwordChangedAt
     });
 
     // SECRET should be atleast 32 letters-preffered and EXPIRES_IN we have set to 90d ie 90 days
@@ -74,8 +76,6 @@ exports.protect = catchAsync(async (req, res, next) => {
         token = req.headers.authorization.split(' ')[1];
     }
 
-    console.log(token);
-
     if (!token) {
         return next(
             new AppError('You are not logged in! Please log in to get access.', 401)
@@ -84,11 +84,32 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
 
     // 2) Verification token
+    // to check if token payload has not been manipulated by some malicious third party
+    // promisify verify fn ie. make it return a promise ->using promisify method of util library
+    // will get a jsonWenTokenError for invalid token 
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    //console.log(decoded);
 
-    // 3) Check if user still exists
+    // 3) Check if user still exists (ie user should not be deleted while we did previous tasks)
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+        return next(
+            new AppError(
+                'The user belonging to this token does no longer exist.',
+                401
+            )
+        );
+    }
 
     // 4) Check if user changed password after the JWT(token) was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {    //pass in the timestamp when this was created using decoded.iat
+        return next(
+            new AppError('User recently changed password! Please log in again.', 401)
+        );
+    }
 
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;     //just putting entire user data on the request for future use
     next();
 
 });
