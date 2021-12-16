@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');    //used jwt instead of sessions to keep our RESTful API stateless
 const User = require('./../models/userModel');
@@ -148,7 +149,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         'host'
     )}/api/v1/users/resetPassword/${resetToken}`;
 
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} \nIf you didn't forget your password, please ignore this email!`;
 
     try {
         // send token to email 
@@ -179,5 +180,36 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+    // 1) Get user based on the token
+    // as resetToken sent in url is non encrypted while in db we have encrypted one
+    // so we hash the non encrypted so that we can compare them
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(req.params.token)
+        .digest('hex');
 
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: Date.now() } //check if password reset has expired right now
+    });
+
+    // 2) If token has not expired, and there is user, set the new password
+    if (!user) {
+        return next(new AppError('Token is invalid or has expired', 400));
+    }
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();      //dont want to turn off validators here as we want to check all like password=passwordConfirm
+    // dont use findOneAndUpdate as we want all validators
+
+    // 3) Update changedPasswordAt property for the user
+    // 4) Log the user in, send JWT
+    const token = signToken(user._id);
+
+    res.status(201).json({
+        status: 'success',
+        token
+    })
 });

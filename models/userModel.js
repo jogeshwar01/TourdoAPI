@@ -58,6 +58,16 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.pre('save', function (next) {
+    if (!this.isModified('password') || this.isNew) return next();
+    // this.isNew is if we create a new Document --exit this middleware
+
+    // kind of a trick -though not completely accurate 
+    //but kinda ensures token created after password changed
+    this.passwordChangedAt = Date.now() - 1000; // -1000milliseconds (1 second) as saving to db is slower than jwt issuing
+    next();
+});
+
 // check if entered password is same as the one stored in db for a particular email
 // instance method and will work on all documents of a certain collection
 userSchema.methods.correctPassword = async function (
