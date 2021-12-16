@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    //need this field to activate/deactivate an account --dont want to delete a user's data permanently from our database
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
+    }
 });
 
 // hash password before saving to db
@@ -65,6 +71,13 @@ userSchema.pre('save', function (next) {
     // kind of a trick -though not completely accurate 
     //but kinda ensures token created after password changed
     this.passwordChangedAt = Date.now() - 1000; // -1000milliseconds (1 second) as saving to db is slower than jwt issuing
+    next();
+});
+
+// Query middleware -so that we only show up the active users
+userSchema.pre(/^find/, function (next) {
+    // this points to the current query
+    this.find({ active: { $ne: false } });
     next();
 });
 
