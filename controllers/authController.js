@@ -20,7 +20,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
-        passwordChangedAt: req.body.passwordChangedAt
+        passwordChangedAt: req.body.passwordChangedAt,
+        role: req.body.role
     });
 
     // SECRET should be atleast 32 letters-preffered and EXPIRES_IN we have set to 90d ie 90 days
@@ -113,3 +114,18 @@ exports.protect = catchAsync(async (req, res, next) => {
     next();
 
 });
+
+// as we need arbitrary no. of args to be passed in the function we create a
+// wrapper function that returns middleware function that we want to create
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+        // roles ['admin', 'lead-guide']. role='user'
+        if (!roles.includes(req.user.role)) {   //we can do this as in protect handle we did req.user = currentUser;
+            return next(
+                new AppError('You do not have permission to perform this action', 403)
+            );
+        }
+
+        next();
+    };
+}
