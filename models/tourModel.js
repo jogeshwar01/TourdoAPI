@@ -80,7 +80,33 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
+    },
+    // can delete it and set first locations in locations array and set day=0 but it is better to specify it separately
+    startLocation: {
+        // GeoJSON
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],  //array of number -> longitude/latitude -this order is opposite to general like in google maps
+        address: String,
+        description: String
+    },
+    // Embedding -> embed locations in tours so we need to create an array of locations
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ]
 },
     {
         toJSON: { virtuals: true },
