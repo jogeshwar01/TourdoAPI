@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -8,10 +9,20 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-//MIDDLEWARES
+// GLOBAL MIDDLEWARES
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
+
+// Limit requests from same API --the number is reset on restarting the app
+// Rate Limiting -to prevent same IP to make too many requests to our API
+const limiter = rateLimit({
+    max: 100,       // Max 100 requests in an hour -adapt to your app
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many requests from this IP, please try again in an hour!'
+});
+// to see how many requests pending in postman check headers in output
+app.use('/api', limiter);   // limit our api routes
 
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));     //public is default folder--to serve static files like any html or images
