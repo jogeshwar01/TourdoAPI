@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+// const User = require('./userModel'); //used for embed user into tours
 // const validator = require('validator');
 
 const tourSchema = new mongoose.Schema({
@@ -106,7 +107,8 @@ const tourSchema = new mongoose.Schema({
             description: String,
             day: Number
         }
-    ]
+    ],
+    //guides:Array       //if we do by embedding user into tours
 },
     {
         toJSON: { virtuals: true },
@@ -126,6 +128,15 @@ tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });
     next();
 });
+
+// //We did change this to Referencing in the next part so commented this out
+// //Embed users into tours using an array of user Ids
+// tourSchema.pre('save', async function(next) {
+//   const guidesPromises = this.guides.map(async id => await User.findById(id)); //async fn returns array of promises
+//   this.guides = await Promise.all(guidesPromises);   //to resolve all promises in one go
+//   next();
+// });
+// //if we did go by this embed way,do this on update docs also
 
 // tourSchema.pre('save', function(next) {
 //   console.log('Will save document...');
