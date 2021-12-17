@@ -15,6 +15,22 @@ const signToken = id => {
 
 const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id);
+    const cookieOptions = {
+        // set JWT_COOKIE_EXPIRES_IN to 90 not 90d as we wanted to do maths on it
+        expires: new Date(
+            Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000        //convert 90 days to milliseconds
+        ),
+        httpOnly: true  //cookie cannot be modified or accessed by browser 
+        //-so browser can only receive,store and send back the cookie in every future request
+    };
+
+    // cookie will only be sent on encypted connection -HTTPS  --only in production as we cannot test it in developmennt
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+    res.cookie('jwt', token, cookieOptions);
+
+    // Remove password from output
+    user.password = undefined;
 
     res.status(statusCode).json({
         status: 'success',
