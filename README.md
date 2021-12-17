@@ -5,7 +5,7 @@ Exploring destination options and ideas with no firm plans and  reserving a cert
 Setting environmental variable based on response. Put it in Tests tab.
 pm.environment.set("jwt", pm.response.json().token);
 
-!(../main/database-design.png)
+<!-- !DatabaseDesign](https://github.com/jogeshwar01/Tourdo.git/main/database-design.png | width=640) -->
 
 # Postman
 
