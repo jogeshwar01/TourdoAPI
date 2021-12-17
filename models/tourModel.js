@@ -165,6 +165,16 @@ tourSchema.pre(/^find/, function (next) {       //works for all finds like find,
     next();
 });
 
+// populate 'guides' field on find queries -only in query and not in actual database
+tourSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'guides',
+        select: '-__v -passwordChangedAt'
+    });
+
+    next();
+});
+
 tourSchema.post(/^find/, function (docs, next) {
     console.log(`Query took ${Date.now() - this.start} milliseconds!`);
     next();

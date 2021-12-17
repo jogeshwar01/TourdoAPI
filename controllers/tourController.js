@@ -31,6 +31,11 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
+    // to populate guides in our query and not in our actual database
+    //const tour = await Tour.findById(req.params.id).populate({
+    //         path: 'guides',
+    //         select: '-__v -passwordChangedAt'
+    //     });
     const tour = await Tour.findById(req.params.id);
     //above is shortcut for --> Tour.findOne({ _id: req.params.id })
 
