@@ -109,6 +109,13 @@ const tourSchema = new mongoose.Schema({
         }
     ],
     //guides:Array       //if we do by embedding user into tours
+    // CHILD REFERENCING
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ]
 },
     {
         toJSON: { virtuals: true },
