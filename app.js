@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -41,6 +42,23 @@ app.use(mongoSanitize());       //looks at req.body,req,query,req,params & filte
 
 // Data sanitization against XSS    ->prevent malicious html code with js
 app.use(xss());
+
+// Prevent parameter pollution --clear up the query string and uses the last specified one instead of creating an array hence no error
+// -> ?sort=difficult&sort=price --express will create an array of sort=['duration','price'] which we cannot split as in apiFeatures and this will give an error
+app.use(
+    hpp({
+        // properties where duplicate values should be allowed are in whitelist
+        // as ?duration=5&duration=9 should work
+        whitelist: [
+            'duration',
+            'ratingsQuantity',
+            'ratingsAverage',
+            'maxGroupSize',
+            'difficulty',
+            'price'
+        ]
+    })
+);
 
 // Serving static files
 app.use(express.static(`${__dirname}/public`));     //public is default folder--to serve static files like any html or images
