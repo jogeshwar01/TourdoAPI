@@ -11,18 +11,19 @@ const filterObj = (obj, ...allowedFields) => {      //...allowedFields --creates
     return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-    const users = await User.find();
+exports.getAllUsers = factory.getAll(User);
+// exports.getAllUsers = catchAsync(async (req, res) => {
+//     const users = await User.find();
 
-    // SEND RESPONSE
-    res.status(200).json({
-        status: 'success',
-        results: users.length,
-        data: {
-            users
-        }
-    });
-});
+//     // SEND RESPONSE
+//     res.status(200).json({
+//         status: 'success',
+//         results: users.length,
+//         data: {
+//             users
+//         }
+//     });
+// });
 
 exports.updateMe = catchAsync(async (req, res, next) => {
     // we give user to only update email and name here 
