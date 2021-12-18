@@ -1,7 +1,7 @@
 const express = require('express');
 const tourController = require('./../controllers/tourController');
 const authController = require('./../controllers/authController');
-const reviewController = require('./../controllers/reviewController');
+const reviewRouter = require('./../routes/reviewRoutes');
 
 const router = express.Router();
 
@@ -10,11 +10,9 @@ const router = express.Router();
 
 // POST /tour/234fad4/reviews
 // GET /tour/234fad4/reviews
-router.route('/:tourId/reviews')
-    .post(authController.protect,
-        authController.restrictTo('user'),
-        reviewController.createReview
-    );
+// need to put it here as our url starts with /tour so it is redirected here from app.js
+router.use('/:tourId/reviews', reviewRouter);   //to prevent duplicate code 
+// mounting a router inside a router --use reviewRouter for these urls
 
 router.route('/top-5-cheap')
     .get(tourController.aliasTopTours, tourController.getAllTours);
