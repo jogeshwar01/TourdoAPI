@@ -70,24 +70,26 @@ exports.createTour = catchAsync(async (req, res, next) => {
     });
 })
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-    //put request won't work as it expects original object to be completely replaced
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,  //to return the newly updated document
-        runValidators: true //run validators again on newly created document
-    });
+exports.updateTour = factory.updateOne(Tour);
 
-    if (!tour) {
-        return next(new AppError('No tour found with that ID', 404));
-    }
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//     //put request won't work as it expects original object to be completely replaced
+//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//         new: true,  //to return the newly updated document
+//         runValidators: true //run validators again on newly created document
+//     });
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    });
-})
+//     if (!tour) {
+//         return next(new AppError('No tour found with that ID', 404));
+//     }
+
+//     res.status(200).json({
+//         status: 'success',
+//         data: {
+//             tour
+//         }
+//     });
+// })
 
 exports.deleteTour = factory.deleteOne(Tour);
 
