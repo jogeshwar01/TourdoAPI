@@ -10,6 +10,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use((req, res, next) => {
 //mounting routers  
 app.use('/api/v1/tours', tourRouter);   //tourRouter is middleware to be applied for specific url
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //to handle for all the requests/http methods.  -order matters hence this has to be at the last else all requests will go into this
 app.all('*', (req, res, next) => {
