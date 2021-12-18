@@ -1,8 +1,8 @@
 const Tour = require('./../models/tourModel');
-// const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
+// const APIFeatures = require('./../utils/apiFeatures');
 
 //top-5-cheap tours --> /api/v1/tours?limit=5&sort=-ratingsAverage,price&fields=name,price,ratingsAverage,summary,difficulty
 exports.aliasTopTours = (req, res, next) => {
@@ -13,104 +13,10 @@ exports.aliasTopTours = (req, res, next) => {
 };
 
 exports.getAllTours = factory.getAll(Tour);
-// exports.getAllTours = catchAsync(async (req, res, next) => {
-//     // EXECUTE QUERY
-//     const features = new APIFeatures(Tour.find(), req.query)
-//         .filter()
-//         .sort()
-//         .limitFields()
-//         .paginate();
-//     const tours = await features.query;
-
-//     // SEND RESPONSE
-//     res.status(200).json({
-//         status: 'success',
-//         results: tours.length,
-//         data: {
-//             tours
-//         }
-//     });
-// });
-
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
-
-// exports.getTour = catchAsync(async (req, res, next) => {
-//     // to populate guides in our query and not in our actual database
-//     //const tour = await Tour.findById(req.params.id).populate({
-//     //         path: 'guides',
-//     //         select: '-__v -passwordChangedAt'
-//     //     });
-//     const tour = await Tour.findById(req.params.id).populate('reviews');
-//     //above is shortcut for --> Tour.findOne({ _id: req.params.id })
-
-//     if (!tour) {
-//         return next(new AppError('No tour found with that ID', 404));
-//     }
-
-//     res.status(200).json({
-//         status: 'success',
-//         data: {
-//             tour
-//         }
-//     });
-// })
-
 exports.createTour = factory.createOne(Tour);
-
-// exports.createTour = catchAsync(async (req, res, next) => {
-//     // const newTour = new Tour({})
-//     // newTour.save()
-//     // Model.prototype.save() -->in mongoose documentation this will be written like this always
-
-//     //another way to do the above creation is to use create method
-//     const newTour = await Tour.create(req.body);
-
-//     //there may be an error related to node not supporting async/await until some version
-//     //so to resolve it, add "engines": {"node": ">=10.0.0"} in the package.json file
-//     res.status(201).json({
-//         status: 'success',
-//         data: {
-//             tour: newTour
-//         }
-//     });
-// })
-
 exports.updateTour = factory.updateOne(Tour);
-
-// exports.updateTour = catchAsync(async (req, res, next) => {
-//     //put request won't work as it expects original object to be completely replaced
-//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-//         new: true,  //to return the newly updated document
-//         runValidators: true //run validators again on newly created document
-//     });
-
-//     if (!tour) {
-//         return next(new AppError('No tour found with that ID', 404));
-//     }
-
-//     res.status(200).json({
-//         status: 'success',
-//         data: {
-//             tour
-//         }
-//     });
-// })
-
 exports.deleteTour = factory.deleteOne(Tour);
-
-// exports.deleteTour = catchAsync(async (req, res, next) => {
-//     //in RESTful API ,we dont send the deleted object back to the client
-//     const tour = await Tour.findByIdAndDelete(req.params.id);
-
-//     if (!tour) {
-//         return next(new AppError('No tour found with that ID', 404));
-//     }
-
-//     res.status(204).json({
-//         status: 'success',
-//         data: null
-//     });
-// })
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
     //need to await it to get back our result,else we will ust get a pipeline aggregate object
@@ -194,3 +100,94 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
         }
     });
 });
+
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//     // EXECUTE QUERY
+//     const features = new APIFeatures(Tour.find(), req.query)
+//         .filter()
+//         .sort()
+//         .limitFields()
+//         .paginate();
+//     const tours = await features.query;
+
+//     // SEND RESPONSE
+//     res.status(200).json({
+//         status: 'success',
+//         results: tours.length,
+//         data: {
+//             tours
+//         }
+//     });
+// });
+
+// exports.getTour = catchAsync(async (req, res, next) => {
+//     // to populate guides in our query and not in our actual database
+//     //const tour = await Tour.findById(req.params.id).populate({
+//     //         path: 'guides',
+//     //         select: '-__v -passwordChangedAt'
+//     //     });
+//     const tour = await Tour.findById(req.params.id).populate('reviews');
+//     //above is shortcut for --> Tour.findOne({ _id: req.params.id })
+
+//     if (!tour) {
+//         return next(new AppError('No tour found with that ID', 404));
+//     }
+
+//     res.status(200).json({
+//         status: 'success',
+//         data: {
+//             tour
+//         }
+//     });
+// })
+
+// exports.createTour = catchAsync(async (req, res, next) => {
+//     // const newTour = new Tour({})
+//     // newTour.save()
+//     // Model.prototype.save() -->in mongoose documentation this will be written like this always
+
+//     //another way to do the above creation is to use create method
+//     const newTour = await Tour.create(req.body);
+
+//     //there may be an error related to node not supporting async/await until some version
+//     //so to resolve it, add "engines": {"node": ">=10.0.0"} in the package.json file
+//     res.status(201).json({
+//         status: 'success',
+//         data: {
+//             tour: newTour
+//         }
+//     });
+// })
+
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//     //put request won't work as it expects original object to be completely replaced
+//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//         new: true,  //to return the newly updated document
+//         runValidators: true //run validators again on newly created document
+//     });
+
+//     if (!tour) {
+//         return next(new AppError('No tour found with that ID', 404));
+//     }
+
+//     res.status(200).json({
+//         status: 'success',
+//         data: {
+//             tour
+//         }
+//     });
+// })
+
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//     //in RESTful API ,we dont send the deleted object back to the client
+//     const tour = await Tour.findByIdAndDelete(req.params.id);
+
+//     if (!tour) {
+//         return next(new AppError('No tour found with that ID', 404));
+//     }
+
+//     res.status(204).json({
+//         status: 'success',
+//         data: null
+//     });
+// })

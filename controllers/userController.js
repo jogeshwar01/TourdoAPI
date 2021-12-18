@@ -11,20 +11,6 @@ const filterObj = (obj, ...allowedFields) => {      //...allowedFields --creates
     return newObj;
 };
 
-exports.getAllUsers = factory.getAll(User);
-// exports.getAllUsers = catchAsync(async (req, res) => {
-//     const users = await User.find();
-
-//     // SEND RESPONSE
-//     res.status(200).json({
-//         status: 'success',
-//         results: users.length,
-//         data: {
-//             users
-//         }
-//     });
-// });
-
 exports.getMe = (req, res, next) => {
     req.params.id = req.user.id;
     next();
@@ -73,8 +59,6 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.getUser = factory.getOne(User);
-
 exports.createUser = (req, res) => {
     res.status(500).json({
         status: 'err',
@@ -82,8 +66,23 @@ exports.createUser = (req, res) => {
     })
 };
 
+exports.getUser = factory.getOne(User);
+exports.getAllUsers = factory.getAll(User);
+
 //Dont do create user using createOne as we have sign up for that and it is different
 
-// Do NOT update passwords with this!
-exports.updateUser = factory.updateOne(User);
+exports.updateUser = factory.updateOne(User);   // Do NOT update passwords with this!
 exports.deleteUser = factory.deleteOne(User);   //only admin can do this,a normal user can only deactivate himself by using active:false
+
+// exports.getAllUsers = catchAsync(async (req, res) => {
+//     const users = await User.find();
+
+//     // SEND RESPONSE
+//     res.status(200).json({
+//         status: 'success',
+//         results: users.length,
+//         data: {
+//             users
+//         }
+//     });
+// });
