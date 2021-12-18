@@ -20,21 +20,31 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.createReview = catchAsync(async (req, res, next) => {
-    //if manually we dont specify the tour & user ids in the url
-    if (!req.body.tour) req.body.tour = req.params.tourId;  //from the parameter in url
-    if (!req.body.user) req.body.user = req.user.id;   //from protect middleware
+exports.setTourUserIds = (req, res, next) => {
+    // Allow nested routes
+    if (!req.body.tour) req.body.tour = req.params.tourId;
+    if (!req.body.user) req.body.user = req.user.id;
+    next();
+};
+//set the body as it was in our old function
 
-    const newReview = await Review.create(req.body);
+exports.createReview = factory.createOne(Review);
 
-    // SEND RESPONSE
-    res.status(201).json({
-        status: 'success',
-        data: {
-            review: newReview
-        }
-    });
-});
+// exports.createReview = catchAsync(async (req, res, next) => {
+//     //if manually we dont specify the tour & user ids in the url
+//     if (!req.body.tour) req.body.tour = req.params.tourId;  //from the parameter in url
+//     if (!req.body.user) req.body.user = req.user.id;   //from protect middleware
+
+//     const newReview = await Review.create(req.body);
+
+//     // SEND RESPONSE
+//     res.status(201).json({
+//         status: 'success',
+//         data: {
+//             review: newReview
+//         }
+//     });
+// });
 
 exports.updateReview = factory.updateOne(Review);
 exports.deleteReview = factory.deleteOne(Review);

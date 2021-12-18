@@ -52,23 +52,25 @@ exports.getTour = catchAsync(async (req, res, next) => {
     });
 })
 
-exports.createTour = catchAsync(async (req, res, next) => {
-    // const newTour = new Tour({})
-    // newTour.save()
-    // Model.prototype.save() -->in mongoose documentation this will be written like this always
+exports.createTour = factory.createOne(Tour);
 
-    //another way to do the above creation is to use create method
-    const newTour = await Tour.create(req.body);
+// exports.createTour = catchAsync(async (req, res, next) => {
+//     // const newTour = new Tour({})
+//     // newTour.save()
+//     // Model.prototype.save() -->in mongoose documentation this will be written like this always
 
-    //there may be an error related to node not supporting async/await until some version
-    //so to resolve it, add "engines": {"node": ">=10.0.0"} in the package.json file
-    res.status(201).json({
-        status: 'success',
-        data: {
-            tour: newTour
-        }
-    });
-})
+//     //another way to do the above creation is to use create method
+//     const newTour = await Tour.create(req.body);
+
+//     //there may be an error related to node not supporting async/await until some version
+//     //so to resolve it, add "engines": {"node": ">=10.0.0"} in the package.json file
+//     res.status(201).json({
+//         status: 'success',
+//         data: {
+//             tour: newTour
+//         }
+//     });
+// })
 
 exports.updateTour = factory.updateOne(Tour);
 

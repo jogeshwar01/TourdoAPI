@@ -81,6 +81,8 @@ exports.createUser = (req, res) => {
     })
 };
 
+//Dont do create user using createOne as we have sign up for that and it is different
+
 // Do NOT update passwords with this!
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);   //only admin can do this,a normal user can only deactivate himself by using active:false

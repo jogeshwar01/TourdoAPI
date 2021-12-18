@@ -15,6 +15,7 @@ router.route('/')
     .post(
         authController.protect,
         authController.restrictTo('user'),  //only users can review
+        reviewController.setTourUserIds,
         reviewController.createReview
     );
 
