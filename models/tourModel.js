@@ -129,6 +129,14 @@ tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
 
+// Virtual Populate --Can access reviews on tours without keeping the array of review ID's on a tour and not actually storing it in our database --imp
+// This solves problem we have in child referencing where we may get an infinite array of reviews on tour
+tourSchema.virtual('reviews', {     //here reviews is just the name we give to the virtual field
+    ref: 'Review',
+    foreignField: 'tour',   //name of the field in the other model which refers to current model
+    localField: '_id'       //where that connecting ID is stored in this current model
+});
+
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()   (insertMany or other methods will not trigger this save middleware)
 // 'save' is the hook --> so this is like pre save hook/middleware
 tourSchema.pre('save', function (next) {

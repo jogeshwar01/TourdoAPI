@@ -38,14 +38,20 @@ const reviewSchema = new mongoose.Schema(
 );
 
 reviewSchema.pre(/^find/, function (next) {
+    // this.populate({
+    //     path: 'tour',
+    //     select: 'name'
+    // }).populate({
+    //     path: 'user',
+    //     select: 'name photo'
+    // });
+    // REMOVED tour populate as we wanted to decrease the chain of populates in our app 
+    // and based on our functionality we can decide accordingly but as we didnt need it here so did this to increase performance
+
     this.populate({
-        path: 'tour',
-        select: 'name'
-    }).populate({
         path: 'user',
         select: 'name photo'
     });
-
     next();
 });
 
