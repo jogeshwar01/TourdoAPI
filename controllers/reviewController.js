@@ -15,6 +15,10 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
 });
 
 exports.createReview = catchAsync(async (req, res, next) => {
+    //if manually we dont specify the tour & user ids in the url
+    if (!req.body.tour) req.body.tour = req.params.tourId;  //from the parameter in url
+    if (!req.body.user) req.body.user = req.user.id;   //from protect middleware
+
     const newReview = await Review.create(req.body);
 
     // SEND RESPONSE
