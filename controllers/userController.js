@@ -25,6 +25,11 @@ exports.getAllUsers = factory.getAll(User);
 //     });
 // });
 
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
     // we give user to only update email and name here 
     //so need to filter these fields out as like eg) a user may also specify role:admin etc which shouldnt be allowed
