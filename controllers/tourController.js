@@ -31,26 +31,28 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.getTour = catchAsync(async (req, res, next) => {
-    // to populate guides in our query and not in our actual database
-    //const tour = await Tour.findById(req.params.id).populate({
-    //         path: 'guides',
-    //         select: '-__v -passwordChangedAt'
-    //     });
-    const tour = await Tour.findById(req.params.id).populate('reviews');
-    //above is shortcut for --> Tour.findOne({ _id: req.params.id })
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
-    if (!tour) {
-        return next(new AppError('No tour found with that ID', 404));
-    }
+// exports.getTour = catchAsync(async (req, res, next) => {
+//     // to populate guides in our query and not in our actual database
+//     //const tour = await Tour.findById(req.params.id).populate({
+//     //         path: 'guides',
+//     //         select: '-__v -passwordChangedAt'
+//     //     });
+//     const tour = await Tour.findById(req.params.id).populate('reviews');
+//     //above is shortcut for --> Tour.findOne({ _id: req.params.id })
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    });
-})
+//     if (!tour) {
+//         return next(new AppError('No tour found with that ID', 404));
+//     }
+
+//     res.status(200).json({
+//         status: 'success',
+//         data: {
+//             tour
+//         }
+//     });
+// })
 
 exports.createTour = factory.createOne(Tour);
 
