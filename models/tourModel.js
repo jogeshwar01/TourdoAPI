@@ -132,6 +132,9 @@ const tourSchema = new mongoose.Schema({
 tourSchema.index({ price: 1, ratingsAverage: -1 });     //COMPOUND index -for multiple fields
 tourSchema.index({ slug: 1 });
 
+tourSchema.index({ startLocation: '2dsphere' });    //index startLocation to a 2d sphere ie. earth like
+//in order to do geospatial queries we need to first attribute an index to the field where the geospatial data we are searching for is stored
+
 // will be created each time data sent from database - not stored in database -hence can't use in queries
 // used regular function instead of an arrow function as we want to use 'this'
 tourSchema.virtual('durationWeeks').get(function () {

@@ -101,6 +101,38 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     });
 });
 
+// /tours-within/:distance/center/:latlng/unit/:unit
+// /tours-within/233/center/34.111745,-118.113491/unit/mi
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+
+    // default unit is km(kilometers) --divide by radius of earth to convert radius to radians
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+    if (!lat || !lng) {
+        next(
+            new AppError(
+                'Please provide latitute and longitude in the format lat,lng.',
+                400
+            )
+        );
+    }
+
+    const tours = await Tour.find({
+        startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
+        //this is just syntax based -here lng comes before lat and radius needs to be in a special unit called radians
+    });
+
+    res.status(200).json({
+        status: 'success',
+        results: tours.length,
+        data: {
+            data: tours
+        }
+    });
+});
+
 // exports.getAllTours = catchAsync(async (req, res, next) => {
 //     // EXECUTE QUERY
 //     const features = new APIFeatures(Tour.find(), req.query)
