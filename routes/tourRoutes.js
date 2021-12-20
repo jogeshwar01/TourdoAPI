@@ -18,11 +18,19 @@ router.route('/top-5-cheap')
     .get(tourController.aliasTopTours, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTourStats);
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+
+router.route('/monthly-plan/:year')
+    .get(authController.protect,
+        authController.restrictTo('admin', 'lead-guide', 'guide'),
+        tourController.getMonthlyPlan
+    );
 
 router.route('/')
-    .get(authController.protect, tourController.getAllTours)
-    .post(tourController.createTour)
+    .get(tourController.getAllTours)    //as we want this part of API to be exposed to everyone 
+    .post(authController.protect,
+        authController.restrictTo('admin', 'lead-guide'),
+        tourController.createTour
+    )
 
 //could have added catchAsync here directly rather than in controller and it will work in the same way
 //but then we would have to remember which one is fully async but here as all are async so no problem but may be there can be 
@@ -30,7 +38,10 @@ router.route('/')
 
 router.route('/:id')
     .get(tourController.getTour)
-    .patch(tourController.updateTour)
+    .patch(authController.protect,
+        authController.restrictTo('admin', 'lead-guide'),
+        tourController.updateTour
+    )
     .delete(
         authController.protect,
         authController.restrictTo('admin', 'lead-guide'),

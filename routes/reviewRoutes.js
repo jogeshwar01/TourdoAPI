@@ -6,6 +6,8 @@ const authController = require('./../controllers/authController');
 // as by default each router has access to its own params only but here we want it from other route url
 const router = express.Router({ mergeParams: true });
 
+router.use(authController.protect);
+
 // BOTH these routes go in this
 // GET /tour/234fad4/reviews
 // POST /tour/234fad4/reviews
@@ -13,15 +15,20 @@ const router = express.Router({ mergeParams: true });
 router.route('/')
     .get(reviewController.getAllReviews)
     .post(
-        authController.protect,
         authController.restrictTo('user'),  //only users can review
         reviewController.setTourUserIds,
         reviewController.createReview
     );
 
+// who can CRUD reviews is all what we design and what makes sense
 router.route('/:id')
     .get(reviewController.getReview)
-    .patch(reviewController.updateReview)
-    .delete(reviewController.deleteReview);
+    .patch(
+        authController.restrictTo('user', 'admin'),
+        reviewController.updateReview
+    )
+    .delete(authController.restrictTo('user', 'admin'),
+        reviewController.deleteReview
+    );
 
 module.exports = router;
