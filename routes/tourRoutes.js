@@ -30,6 +30,8 @@ router.route('/tours-within/:distance/center/:latlng/unit/:unit')
 // /tours-within?distance=233&center=-40,45&unit=mi     //could have done the same like this with query strings
 // /tours-within/233/center/-40,45/unit/mi
 
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
 router.route('/')
     .get(tourController.getAllTours)    //as we want this part of API to be exposed to everyone 
     .post(authController.protect,

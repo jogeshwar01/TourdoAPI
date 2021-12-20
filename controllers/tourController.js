@@ -107,7 +107,7 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     const { distance, latlng, unit } = req.params;
     const [lat, lng] = latlng.split(',');
 
-    // default unit is km(kilometers) --divide by radius of earth to convert radius to radians
+    //--divide by radius of earth to convert radius to radians
     const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
 
     if (!lat || !lng) {
@@ -129,6 +129,54 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
         results: tours.length,
         data: {
             data: tours
+        }
+    });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+    const { latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+
+    const multiplier = unit === 'mi' ? 0.000621371 : 0.001; //convert metres to miles or km
+
+    if (!lat || !lng) {
+        next(
+            new AppError(
+                'Please provide latitutr and longitude in the format lat,lng.',
+                400
+            )
+        );
+    }
+
+    const distances = await Tour.aggregate([
+        {
+            //geoNear requires one of our fields to contain geospatial index
+            //and we have already done that for startLocation and it will automatically use that index to perform calculation
+            //else u need to define the field that is to be used for calculations
+            //so here dist b/w given lat/long and startLocations
+            //also geoNear must be the first stage in the pipeline
+            $geoNear: {
+                near: {
+                    type: 'Point',
+                    coordinates: [lng * 1, lat * 1] // * 1 --to convert to numbers
+                },
+                distanceField: 'distance',  //name of field created where all calc distances will be stored
+                distanceMultiplier: multiplier  //for conversion of metres to miles/km
+            }
+        },
+        //used project to only display distance and name in the output
+        {
+            $project: {
+                distance: 1,
+                name: 1
+            }
+        }
+    ]);
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            data: distances
         }
     });
 });
