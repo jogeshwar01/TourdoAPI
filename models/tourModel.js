@@ -8,6 +8,7 @@ const tourSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A tour must have a name'],
         trim: true,
+        // this unique field will lead to creation of a unique index in mongodb for name
         unique: true,       //not a validator (though will show error if name same)
         maxlength: [40, 'A tour name must have less or equal then 40 characters'],
         minlength: [10, 'A tour name must have more or equal then 10 characters'],
@@ -122,6 +123,13 @@ const tourSchema = new mongoose.Schema({
         toObject: { virtuals: true }
     }
 );
+
+//INDEXES =to improve performance in no. of fields examined vs returned --add .explain() on query to see these
+// why dont we just use index on all fields --we need to study access(R/W) pattern of our app and see which fields are queried the most 
+// as we really dont want to overdo it,as each index uses resources and each index needs to be updated whenever a collection is updated
+//tourSchema.index({ price: 1 }); // 1-sorting in ascending order   --no need of this as we have compound index including price
+tourSchema.index({ price: 1, ratingsAverage: -1 });     //COMPOUND index -for multiple fields
+tourSchema.index({ slug: 1 });
 
 // will be created each time data sent from database - not stored in database -hence can't use in queries
 // used regular function instead of an arrow function as we want to use 'this'
