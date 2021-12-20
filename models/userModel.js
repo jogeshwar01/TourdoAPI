@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// comment these 2 pre save middlewares before importing data from users.json data file as we have encrypted password there already
 // hash password before saving to db
 userSchema.pre('save', async function (next) {
     // Only run this function if password was actually modified/created new
