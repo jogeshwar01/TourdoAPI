@@ -1,4 +1,10 @@
-# Tourdo
+<div align="right">
+  <img src="https://img.shields.io/badge/Completion-100%25-blue.svg" />
+</div>
+
+<div>
+  <h1>Tourdo 🚴</h1>
+</div> 
 Exploring destination options and ideas with no firm plans and  reserving a certain activity.
 
 ## Key Features
